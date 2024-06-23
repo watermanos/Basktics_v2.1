@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Basktics_v2._0
@@ -17,9 +10,15 @@ namespace Basktics_v2._0
             InitializeComponent();
         }
 
+        private void matchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MatchForm matchForm = new MatchForm();
+            matchForm.Show();
+        }
+
         private void Basketics_Load(object sender, EventArgs e)
         {
-
+            // Any initialization code can go here
         }
     }
 }

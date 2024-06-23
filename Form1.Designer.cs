@@ -70,6 +70,7 @@
             // 
             this.matchToolStripMenuItem.Name = "matchToolStripMenuItem";
             resources.ApplyResources(this.matchToolStripMenuItem, "matchToolStripMenuItem");
+            this.matchToolStripMenuItem.Click += new System.EventHandler(this.matchToolStripMenuItem_Click);
             // 
             // newTeamToolStripMenuItem
             // 
@@ -113,4 +114,3 @@
         private System.Windows.Forms.ToolStripMenuItem matchToolStripMenuItem;
     }
 }
-
