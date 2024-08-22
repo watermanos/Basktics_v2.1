@@ -204,6 +204,7 @@ namespace Basktics_v2._0
         private void MatchForm_Load(object sender, EventArgs e)
         {
 
+                _ = DataGridViewTextBoxColumn.Rows.Add();
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
