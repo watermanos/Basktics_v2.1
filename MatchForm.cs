@@ -32,9 +32,9 @@ namespace Basktics_v2._0
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.programBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
+            this.programBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -44,9 +44,9 @@ namespace Basktics_v2._0
             // numericUpDown1
             // 
             this.numericUpDown1.AllowDrop = true;
-            this.numericUpDown1.Location = new System.Drawing.Point(446, 91);
+            this.numericUpDown1.Location = new System.Drawing.Point(613, 111);
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDown1.Size = new System.Drawing.Size(80, 22);
             this.numericUpDown1.TabIndex = 0;
             this.numericUpDown1.Tag = "Home";
             this.numericUpDown1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -54,9 +54,9 @@ namespace Basktics_v2._0
             // numericUpDown2
             // 
             this.numericUpDown2.AllowDrop = true;
-            this.numericUpDown2.Location = new System.Drawing.Point(617, 91);
+            this.numericUpDown2.Location = new System.Drawing.Point(784, 111);
             this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDown2.Size = new System.Drawing.Size(80, 22);
             this.numericUpDown2.TabIndex = 1;
             this.numericUpDown2.Tag = "AWAY";
             this.numericUpDown2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -77,11 +77,12 @@ namespace Basktics_v2._0
             this.Column8,
             this.Column9});
             this.dataGridView1.DataSource = this.programBindingSource;
-            this.dataGridView1.Location = new System.Drawing.Point(4, 244);
+            this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnKeystroke;
+            this.dataGridView1.Location = new System.Drawing.Point(171, 264);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(1172, 157);
+            this.dataGridView1.Size = new System.Drawing.Size(1182, 451);
             this.dataGridView1.TabIndex = 2;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
@@ -149,15 +150,11 @@ namespace Basktics_v2._0
             this.Column9.Name = "Column9";
             this.Column9.Width = 125;
             // 
-            // programBindingSource
-            // 
-            this.programBindingSource.DataSource = typeof(Basktics_v2._0.Program);
-            // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(447, 55);
+            this.textBox1.Location = new System.Drawing.Point(614, 75);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(68, 22);
+            this.textBox1.Size = new System.Drawing.Size(78, 22);
             this.textBox1.TabIndex = 3;
             this.textBox1.Text = "Home";
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -165,23 +162,28 @@ namespace Basktics_v2._0
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(617, 55);
+            this.textBox2.Location = new System.Drawing.Point(784, 75);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(68, 22);
+            this.textBox2.Size = new System.Drawing.Size(78, 22);
             this.textBox2.TabIndex = 4;
             this.textBox2.Text = "Away";
             this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // programBindingSource
+            // 
+            this.programBindingSource.DataSource = typeof(Basktics_v2._0.Program);
+            // 
             // MatchForm
             // 
             this.AccessibleDescription = "";
-            this.ClientSize = new System.Drawing.Size(1188, 474);
+            this.ClientSize = new System.Drawing.Size(1504, 823);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.numericUpDown2);
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.dataGridView1);
             this.Name = "MatchForm";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.MatchForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
@@ -203,9 +205,17 @@ namespace Basktics_v2._0
 
         private void MatchForm_Load(object sender, EventArgs e)
         {
+            // Προσθήκη σειρών στο DataGridView
+            for (int i = 0; i < 16; i++)
+            {
 
-                _ = DataGridViewTextBoxColumn.Rows.Add();
+                // Αφαίρεση της σύνδεσης δεδομένων αν υπάρχει
+                dataGridView1.DataSource = null;
+
+                dataGridView1.Rows.Add();
+            }
         }
+
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {

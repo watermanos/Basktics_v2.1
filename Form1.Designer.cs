@@ -31,11 +31,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Basketics));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.teamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.playersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.matchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newTeamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.yourTeamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.playersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addNewPlayerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.matchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,19 +59,6 @@
             this.teamToolStripMenuItem.Name = "teamToolStripMenuItem";
             resources.ApplyResources(this.teamToolStripMenuItem, "teamToolStripMenuItem");
             // 
-            // playersToolStripMenuItem
-            // 
-            this.playersToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addNewPlayerToolStripMenuItem});
-            this.playersToolStripMenuItem.Name = "playersToolStripMenuItem";
-            resources.ApplyResources(this.playersToolStripMenuItem, "playersToolStripMenuItem");
-            // 
-            // matchToolStripMenuItem
-            // 
-            this.matchToolStripMenuItem.Name = "matchToolStripMenuItem";
-            resources.ApplyResources(this.matchToolStripMenuItem, "matchToolStripMenuItem");
-            this.matchToolStripMenuItem.Click += new System.EventHandler(this.matchToolStripMenuItem_Click);
-            // 
             // newTeamToolStripMenuItem
             // 
             this.newTeamToolStripMenuItem.Name = "newTeamToolStripMenuItem";
@@ -82,10 +69,23 @@
             this.yourTeamToolStripMenuItem.Name = "yourTeamToolStripMenuItem";
             resources.ApplyResources(this.yourTeamToolStripMenuItem, "yourTeamToolStripMenuItem");
             // 
+            // playersToolStripMenuItem
+            // 
+            this.playersToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addNewPlayerToolStripMenuItem});
+            this.playersToolStripMenuItem.Name = "playersToolStripMenuItem";
+            resources.ApplyResources(this.playersToolStripMenuItem, "playersToolStripMenuItem");
+            // 
             // addNewPlayerToolStripMenuItem
             // 
             this.addNewPlayerToolStripMenuItem.Name = "addNewPlayerToolStripMenuItem";
             resources.ApplyResources(this.addNewPlayerToolStripMenuItem, "addNewPlayerToolStripMenuItem");
+            // 
+            // matchToolStripMenuItem
+            // 
+            this.matchToolStripMenuItem.Name = "matchToolStripMenuItem";
+            resources.ApplyResources(this.matchToolStripMenuItem, "matchToolStripMenuItem");
+            this.matchToolStripMenuItem.Click += new System.EventHandler(this.matchToolStripMenuItem_Click);
             // 
             // Basketics
             // 
@@ -95,6 +95,7 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             this.Controls.Add(this.menuStrip1);
             this.Name = "Basketics";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.Basketics_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

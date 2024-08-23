@@ -121,11 +121,29 @@
     <value>17, 17</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="newTeamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 26</value>
+  </data>
+  <data name="newTeamToolStripMenuItem.Text" xml:space="preserve">
+    <value>New Team</value>
+  </data>
+  <data name="yourTeamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 26</value>
+  </data>
+  <data name="yourTeamToolStripMenuItem.Text" xml:space="preserve">
+    <value>Your Team</value>
+  </data>
   <data name="teamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>59, 24</value>
   </data>
   <data name="teamToolStripMenuItem.Text" xml:space="preserve">
     <value>Team</value>
+  </data>
+  <data name="addNewPlayerToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>199, 26</value>
+  </data>
+  <data name="addNewPlayerToolStripMenuItem.Text" xml:space="preserve">
+    <value>Add New player</value>
   </data>
   <data name="playersToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>69, 24</value>
@@ -163,24 +181,6 @@
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
     <value>0</value>
-  </data>
-  <data name="newTeamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>224, 26</value>
-  </data>
-  <data name="newTeamToolStripMenuItem.Text" xml:space="preserve">
-    <value>New Team</value>
-  </data>
-  <data name="yourTeamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>224, 26</value>
-  </data>
-  <data name="yourTeamToolStripMenuItem.Text" xml:space="preserve">
-    <value>Your Team</value>
-  </data>
-  <data name="addNewPlayerToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>224, 26</value>
-  </data>
-  <data name="addNewPlayerToolStripMenuItem.Text" xml:space="preserve">
-    <value>Add New player</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -302,18 +302,6 @@
   <data name="&gt;&gt;teamToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;playersToolStripMenuItem.Name" xml:space="preserve">
-    <value>playersToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;playersToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;matchToolStripMenuItem.Name" xml:space="preserve">
-    <value>matchToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;matchToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;newTeamToolStripMenuItem.Name" xml:space="preserve">
     <value>newTeamToolStripMenuItem</value>
   </data>
@@ -326,10 +314,22 @@
   <data name="&gt;&gt;yourTeamToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;playersToolStripMenuItem.Name" xml:space="preserve">
+    <value>playersToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;playersToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;addNewPlayerToolStripMenuItem.Name" xml:space="preserve">
     <value>addNewPlayerToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;addNewPlayerToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;matchToolStripMenuItem.Name" xml:space="preserve">
+    <value>matchToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;matchToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
