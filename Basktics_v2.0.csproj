@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="dataGridView1_CellValueChanged.cs" />
+    <Compile Include="dataGridView1_EditingControlShowing.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

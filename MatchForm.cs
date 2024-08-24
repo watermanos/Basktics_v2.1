@@ -1,35 +1,41 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Basktics_v2._0
 {
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public partial class MatchForm : Form
     {
         public MatchForm()
         {
             InitializeComponent();
+
+            this.dataGridView1.CellValueChanged += new DataGridViewCellEventHandler(dataGridView1_CellValueChanged);
+            this.dataGridView1.EditingControlShowing += new DataGridViewEditingControlShowingEventHandler(dataGridView1_EditingControlShowing1);
+
         }
 
         private void InitializeComponent()
         {
-            this.numericUpDown1 = new NumericUpDown();
-            this.numericUpDown2 = new NumericUpDown();
-            this.dataGridView1 = new DataGridView();
-            this.Column1 = new DataGridViewTextBoxColumn();
-            this.Column2 = new DataGridViewTextBoxColumn();
-            this.Column3 = new DataGridViewTextBoxColumn();
-            this.Column4 = new DataGridViewTextBoxColumn();
-            this.Column5 = new DataGridViewTextBoxColumn();
-            this.Column6 = new DataGridViewTextBoxColumn();
-            this.Column7 = new DataGridViewTextBoxColumn();
-            this.Column8 = new DataGridViewTextBoxColumn();
-            this.Column9 = new DataGridViewTextBoxColumn();
-            this.Column10 = new DataGridViewTextBoxColumn();
-            this.textBox1 = new TextBox();
-            this.textBox2 = new TextBox();
-            ((ISupportInitialize)(this.numericUpDown1)).BeginInit();
-            ((ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn(); 
+            this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // numericUpDown1
@@ -50,10 +56,9 @@ namespace Basktics_v2._0
             // 
             // dataGridView1
             // 
-            this.dataGridView1.AutoGenerateColumns = false; // look here gia autogenerate //
             this.dataGridView1.BackgroundColor = System.Drawing.Color.White;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new DataGridViewColumn[] {
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column1,
             this.Column2,
             this.Column3,
@@ -63,11 +68,12 @@ namespace Basktics_v2._0
             this.Column7,
             this.Column8,
             this.Column9,
+            this.Column10});
             this.dataGridView1.Location = new System.Drawing.Point(129, 255);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(1180, 207);
+            this.dataGridView1.Size = new System.Drawing.Size(1258, 286);
             this.dataGridView1.TabIndex = 2;
             // 
             // Column1
@@ -100,23 +106,23 @@ namespace Basktics_v2._0
             // 
             // Column5
             // 
-            this.Column5.HeaderText = "Points";
+            this.Column5.HeaderText = "Rebounds";
             this.Column5.MinimumWidth = 6;
             this.Column5.Name = "Column5";
             this.Column5.Width = 125;
             // 
             // Column6
             // 
-            this.Column6.HeaderText = "Rebounds";
+            this.Column6.HeaderText = "Assists";
             this.Column6.MinimumWidth = 6;
             this.Column6.Name = "Column6";
             this.Column6.Width = 125;
             // 
             // Column7
             // 
-            this.Column7.HeaderText = "Assists";
+            this.Column7.HeaderText = "Steals";
             this.Column7.MinimumWidth = 6;
-            this.Column7.Name = "Column6";
+            this.Column7.Name = "Column7";
             this.Column7.Width = 125;
             // 
             // Column8
@@ -128,10 +134,17 @@ namespace Basktics_v2._0
             // 
             // Column9
             // 
-            this.Column9.HeaderText = "Blocks";
+            this.Column9.HeaderText = "Fouls";
             this.Column9.MinimumWidth = 6;
             this.Column9.Name = "Column9";
             this.Column9.Width = 125;
+            // 
+            // Column9
+            // 
+            this.Column10.HeaderText = "Fouls";
+            this.Column10.MinimumWidth = 6;
+            this.Column10.Name = "Column10";
+            this.Column10.Width = 125;
             // 
             // textBox1
             // 
@@ -160,7 +173,8 @@ namespace Basktics_v2._0
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.dataGridView1);
             this.Name = "MatchForm";
-            this.Load += new System.EventHandler(this.MatchForm_Load);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
@@ -176,13 +190,13 @@ namespace Basktics_v2._0
         {
 
         }
-        private IContainer components;
+        //private IContainer components;
 
-        private void MatchForm_Load(object sender, EventArgs e)
+       /* private void MatchForm_Load(object sender, EventArgs e)
         {
 
                 _ = DataGridViewTextBoxColumn.Rows.Add();
-        }
+        }*/
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
@@ -201,13 +215,71 @@ namespace Basktics_v2._0
         private DataGridViewTextBoxColumn Column7;
         private DataGridViewTextBoxColumn Column8;
         private DataGridViewTextBoxColumn Column9;
+        private DataGridViewTextBoxColumn Column10;
 
-        private void MatchForm_Load(object sender, EventArgs e)
+        private void MatchForm_Load1(object sender, EventArgs e)
         {
             for (int i = 0; i < 16; i++)
             {
                 dataGridView1.Rows.Add();
             }
         }
+
+        private static object GetDebuggerDisplay()
+        {
+            throw new NotImplementedException();
+        }
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                // Έλεγχος αν η αλλαγή έγινε σε μια από τις στήλες 2, 3 ή 4
+                if (e.ColumnIndex == this.Column2.Index || e.ColumnIndex == this.Column3.Index || e.ColumnIndex == this.Column4.Index)
+                {
+                    // Πάρε την τρέχουσα γραμμή
+                    DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+
+                    // Υπολόγισε το άθροισμα των στηλών 2, 3 και 4
+                    int twoPoint = Convert.ToInt32(row.Cells["Column2"].Value ?? 0);
+                    int threePoint = Convert.ToInt32(row.Cells["Column3"].Value ?? 0);
+                    int freeThrows = Convert.ToInt32(row.Cells["Column4"].Value ?? 0);
+
+                    int sum = 2 * twoPoint + 3 * threePoint + freeThrows;
+
+                    // Αποθήκευσε το άθροισμα στη στήλη 10 (Points)
+                    row.Cells["Column10"].Value = sum;
+                }
+            }
+        }
+
+
+
+
+
+        // Χρειάζεται για να καταχωρηθεί η αλλαγή όταν ο χρήστης τελειώνει την επεξεργασία ενός κελιού
+        private void dataGridView1_EditingControlShowing1(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            e.Control.KeyPress -= new KeyPressEventHandler(Column_KeyPress);
+            if (this.dataGridView1.CurrentCell.ColumnIndex == this.Column2.Index ||
+                this.dataGridView1.CurrentCell.ColumnIndex == this.Column3.Index ||
+                this.dataGridView1.CurrentCell.ColumnIndex == this.Column4.Index) // Μόνο για τις στήλες 2, 3 και 4
+            {
+                TextBox tb = e.Control as TextBox;
+                if (tb != null)
+                {
+                    tb.KeyPress += new KeyPressEventHandler(Column_KeyPress);
+                }
+            }
+        }
+
+        private void Column_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Επιτρέπονται μόνο αριθμοί και το πλήκτρο Backspace
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
     }
 }
