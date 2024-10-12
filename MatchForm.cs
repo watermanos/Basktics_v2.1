@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using OfficeOpenXml;
+using System.IO;
 
 namespace Basktics_v2._0
 {
@@ -13,8 +15,57 @@ namespace Basktics_v2._0
 
             this.dataGridView1.CellValueChanged += new DataGridViewCellEventHandler(dataGridView1_CellValueChanged);
             this.dataGridView1.EditingControlShowing += new DataGridViewEditingControlShowingEventHandler(dataGridView1_EditingControlShowing1);
+            this.FormClosing += new FormClosingEventHandler(MatchForm_FormClosing);
+
 
         }
+        private void MatchForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Εμφανίζει το παράθυρο διαλόγου αποθήκευσης αρχείου
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Excel Files|*.xlsx";
+                saveFileDialog.Title = "Save Match Data to Excel File";
+                saveFileDialog.FileName = "MatchData.xlsx";
+
+                // Αν ο χρήστης πατήσει OK, αποθηκεύει το αρχείο Excel
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    SaveDataToExcel(saveFileDialog.FileName);
+                }
+            }
+        }
+
+        private void SaveDataToExcel(string filePath)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (ExcelPackage package = new ExcelPackage())
+            {
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Match Data");
+
+                // Προσθήκη επικεφαλίδων από το DataGridView
+                for (int i = 0; i < dataGridView1.Columns.Count; i++)
+                {
+                    worksheet.Cells[1, i + 1].Value = dataGridView1.Columns[i].HeaderText;
+                }
+
+                // Προσθήκη δεδομένων από το DataGridView
+                for (int i = 0; i < dataGridView1.Rows.Count; i++)
+                {
+                    for (int j = 0; j < dataGridView1.Columns.Count; j++)
+                    {
+                        worksheet.Cells[i + 2, j + 1].Value = dataGridView1.Rows[i].Cells[j].Value;
+                    }
+                }
+
+                // Αποθήκευση του αρχείου Excel
+                FileInfo excelFile = new FileInfo(filePath);
+                package.SaveAs(excelFile);
+            }
+
+            MessageBox.Show("Τα δεδομένα αποθηκεύτηκαν με επιτυχία στο Excel!", "Αποθήκευση", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
 
         private void InitializeComponent()
         {

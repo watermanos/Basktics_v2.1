@@ -121,38 +121,8 @@
     <value>17, 17</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="newTeamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>162, 26</value>
-  </data>
-  <data name="newTeamToolStripMenuItem.Text" xml:space="preserve">
-    <value>New Team</value>
-  </data>
-  <data name="yourTeamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>162, 26</value>
-  </data>
-  <data name="yourTeamToolStripMenuItem.Text" xml:space="preserve">
-    <value>Your Team</value>
-  </data>
-  <data name="teamToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>59, 24</value>
-  </data>
-  <data name="teamToolStripMenuItem.Text" xml:space="preserve">
-    <value>Team</value>
-  </data>
-  <data name="addNewPlayerToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>199, 26</value>
-  </data>
-  <data name="addNewPlayerToolStripMenuItem.Text" xml:space="preserve">
-    <value>Add New player</value>
-  </data>
-  <data name="playersToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>69, 24</value>
-  </data>
-  <data name="playersToolStripMenuItem.Text" xml:space="preserve">
-    <value>Players</value>
-  </data>
   <data name="matchToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>64, 24</value>
+    <value>53, 20</value>
   </data>
   <data name="matchToolStripMenuItem.Text" xml:space="preserve">
     <value>Match</value>
@@ -160,8 +130,12 @@
   <data name="menuStrip1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="menuStrip1.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 2, 0, 2</value>
+  </data>
   <data name="menuStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>532, 28</value>
+    <value>399, 24</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="menuStrip1.TabIndex" type="System.Int32, mscorlib">
@@ -186,7 +160,7 @@
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>8, 16</value>
+    <value>6, 13</value>
   </data>
   <data name="$this.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -291,40 +265,13 @@
 </value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>532, 1055</value>
+    <value>399, 857</value>
+  </data>
+  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 2, 2, 2</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Basketstatics</value>
-  </data>
-  <data name="&gt;&gt;teamToolStripMenuItem.Name" xml:space="preserve">
-    <value>teamToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;teamToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;newTeamToolStripMenuItem.Name" xml:space="preserve">
-    <value>newTeamToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;newTeamToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;yourTeamToolStripMenuItem.Name" xml:space="preserve">
-    <value>yourTeamToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;yourTeamToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;playersToolStripMenuItem.Name" xml:space="preserve">
-    <value>playersToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;playersToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;addNewPlayerToolStripMenuItem.Name" xml:space="preserve">
-    <value>addNewPlayerToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;addNewPlayerToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;matchToolStripMenuItem.Name" xml:space="preserve">
     <value>matchToolStripMenuItem</value>
