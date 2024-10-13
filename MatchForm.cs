@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using OfficeOpenXml;
 using System.IO;
+using System.ComponentModel;
 
 namespace Basktics_v2._0
 {
@@ -21,14 +22,14 @@ namespace Basktics_v2._0
         }
         private void MatchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Εμφανίζει το παράθυρο διαλόγου αποθήκευσης αρχείου
+            //Displays the file save dialog.
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
                 saveFileDialog.Filter = "Excel Files|*.xlsx";
                 saveFileDialog.Title = "Save Match Data to Excel File";
                 saveFileDialog.FileName = "MatchData.xlsx";
 
-                // Αν ο χρήστης πατήσει OK, αποθηκεύει το αρχείο Excel
+                // If the user clicks OK, it saves the Excel file.
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     SaveDataToExcel(saveFileDialog.FileName);
@@ -38,7 +39,8 @@ namespace Basktics_v2._0
 
         private void SaveDataToExcel(string filePath)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
             using (ExcelPackage package = new ExcelPackage())
             {
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Match Data");
@@ -49,7 +51,7 @@ namespace Basktics_v2._0
                     worksheet.Cells[1, i + 1].Value = dataGridView1.Columns[i].HeaderText;
                 }
 
-                // Προσθήκη δεδομένων από το DataGridView
+                //Adds headers from the DataGridView.
                 for (int i = 0; i < dataGridView1.Rows.Count; i++)
                 {
                     for (int j = 0; j < dataGridView1.Columns.Count; j++)
@@ -58,12 +60,12 @@ namespace Basktics_v2._0
                     }
                 }
 
-                // Αποθήκευση του αρχείου Excel
+                // data save excel
                 FileInfo excelFile = new FileInfo(filePath);
                 package.SaveAs(excelFile);
             }
 
-            MessageBox.Show("Τα δεδομένα αποθηκεύτηκαν με επιτυχία στο Excel!", "Αποθήκευση", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Data successfully saved to Excel!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
@@ -82,6 +84,8 @@ namespace Basktics_v2._0
             this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
@@ -101,7 +105,7 @@ namespace Basktics_v2._0
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(594, 93);
+            this.numericUpDown1.Location = new System.Drawing.Point(578, 93);
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(70, 22);
             this.numericUpDown1.TabIndex = 0;
@@ -129,13 +133,16 @@ namespace Basktics_v2._0
             this.Column7,
             this.Column8,
             this.Column9,
-            this.Column10});
-            this.dataGridView1.Location = new System.Drawing.Point(333, 260);
+            this.Column10,
+            this.Column11,
+            this.Column12});
+            this.dataGridView1.Location = new System.Drawing.Point(237, 260);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(815, 264);
+            this.dataGridView1.Size = new System.Drawing.Size(962, 353);
             this.dataGridView1.TabIndex = 2;
+            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // Column1
             // 
@@ -167,49 +174,63 @@ namespace Basktics_v2._0
             // 
             // Column5
             // 
-            this.Column5.HeaderText = "Rebounds";
+            this.Column5.HeaderText = "Off. Rebounds";
             this.Column5.MinimumWidth = 6;
             this.Column5.Name = "Column5";
             this.Column5.Width = 75;
             // 
             // Column6
             // 
-            this.Column6.HeaderText = "Assists";
+            this.Column6.HeaderText = "Def. Rebounds";
             this.Column6.MinimumWidth = 6;
             this.Column6.Name = "Column6";
             this.Column6.Width = 75;
             // 
             // Column7
             // 
-            this.Column7.HeaderText = "Steals";
+            this.Column7.HeaderText = "Assists";
             this.Column7.MinimumWidth = 6;
             this.Column7.Name = "Column7";
             this.Column7.Width = 75;
             // 
             // Column8
             // 
-            this.Column8.HeaderText = "Blocks";
+            this.Column8.HeaderText = "Steals";
             this.Column8.MinimumWidth = 6;
             this.Column8.Name = "Column8";
             this.Column8.Width = 75;
             // 
             // Column9
             // 
-            this.Column9.HeaderText = "Fouls";
+            this.Column9.HeaderText = "Blocks";
             this.Column9.MinimumWidth = 6;
             this.Column9.Name = "Column9";
             this.Column9.Width = 75;
             // 
             // Column10
             // 
-            this.Column10.HeaderText = "Points";
+            this.Column10.HeaderText = "Fouls";
             this.Column10.MinimumWidth = 6;
             this.Column10.Name = "Column10";
             this.Column10.Width = 75;
             // 
+            // Column11
+            // 
+            this.Column11.HeaderText = "Points";
+            this.Column11.MinimumWidth = 6;
+            this.Column11.Name = "Column11";
+            this.Column11.Width = 75;
+            // 
+            // Column12
+            // 
+            this.Column12.HeaderText = "Rebounds";
+            this.Column12.MinimumWidth = 6;
+            this.Column12.Name = "Column12";
+            this.Column12.Width = 75;
+            // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(595, 57);
+            this.textBox1.Location = new System.Drawing.Point(575, 57);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(68, 22);
             this.textBox1.TabIndex = 3;
@@ -389,6 +410,8 @@ namespace Basktics_v2._0
         private DataGridViewTextBoxColumn Column8;
         private DataGridViewTextBoxColumn Column9;
         private DataGridViewTextBoxColumn Column10;
+        private DataGridViewTextBoxColumn Column11;
+        private DataGridViewTextBoxColumn Column12;
 
         private void MatchForm_Load1(object sender, EventArgs e)
         {
@@ -406,21 +429,37 @@ namespace Basktics_v2._0
         {
             if (e.RowIndex >= 0)
             {
-                // Έλεγχος αν η αλλαγή έγινε σε μια από τις στήλες 2, 3 ή 4
+                // ""Checks if the change was made in one of the columns 2, 3, or 4.""
                 if (e.ColumnIndex == this.Column2.Index || e.ColumnIndex == this.Column3.Index || e.ColumnIndex == this.Column4.Index)
                 {
-                    // Πάρε την τρέχουσα γραμμή
+                    // "Get the current row."
                     DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
 
-                    // Υπολόγισε το άθροισμα των στηλών 2, 3 και 4
+                    // "Calculate the sum of columns 2, 3, and 4."
                     int twoPoint = Convert.ToInt32(row.Cells["Column2"].Value ?? 0);
                     int threePoint = Convert.ToInt32(row.Cells["Column3"].Value ?? 0);
                     int freeThrows = Convert.ToInt32(row.Cells["Column4"].Value ?? 0);
 
                     int sum = 2 * twoPoint + 3 * threePoint + freeThrows;
 
-                    // Αποθήκευσε το άθροισμα στη στήλη 10 (Points)
-                    row.Cells["Column10"].Value = sum;
+                    // "Store the sum in column 11 (Points)."
+                    row.Cells["Column11"].Value = sum;
+                }
+                // ""Checks if the change was made in one of the columns 5, 6 "
+                if (e.ColumnIndex == this.Column5.Index || e.ColumnIndex == this.Column6.Index)
+                {
+                    // "Get the current row."
+                    DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+
+                    // "Calculate the sum of columns 5, 6 "
+                    int offence = Convert.ToInt32(row.Cells["Column5"].Value ?? 0);
+                    int defence = Convert.ToInt32(row.Cells["Column6"].Value ?? 0);
+
+
+                    int sum = offence + defence;
+
+                    // "Store the sum in column 12 (Points)."
+                    row.Cells["Column12"].Value = sum;
                 }
             }
         }
@@ -429,13 +468,15 @@ namespace Basktics_v2._0
 
 
 
-        // Χρειάζεται για να καταχωρηθεί η αλλαγή όταν ο χρήστης τελειώνει την επεξεργασία ενός κελιού
+        // "Required to register the change when the user finishes editing a cell."
         private void dataGridView1_EditingControlShowing1(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
             e.Control.KeyPress -= new KeyPressEventHandler(Column_KeyPress);
             if (this.dataGridView1.CurrentCell.ColumnIndex == this.Column2.Index ||
                 this.dataGridView1.CurrentCell.ColumnIndex == this.Column3.Index ||
-                this.dataGridView1.CurrentCell.ColumnIndex == this.Column4.Index) // Μόνο για τις στήλες 2, 3 και 4
+                this.dataGridView1.CurrentCell.ColumnIndex == this.Column4.Index ||
+                this.dataGridView1.CurrentCell.ColumnIndex == this.Column5.Index ||
+                this.dataGridView1.CurrentCell.ColumnIndex == this.Column6.Index) // for columns 3 , 4 , 5 ,6 
             {
                 TextBox tb = e.Control as TextBox;
                 if (tb != null)
@@ -447,7 +488,7 @@ namespace Basktics_v2._0
 
         private void Column_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Επιτρέπονται μόνο αριθμοί και το πλήκτρο Backspace
+            // "Only digits and the Backspace key are allowed."
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true;
@@ -476,6 +517,11 @@ namespace Basktics_v2._0
         private CheckBox checkBox10;
 
         private void checkBox7_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
         }
