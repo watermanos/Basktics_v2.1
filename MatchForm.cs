@@ -209,7 +209,7 @@ namespace Basktics_v2._0
             // 
             // Column10
             // 
-            this.Column10.HeaderText = "Fouls";
+            this.Column10.HeaderText = "Faults";
             this.Column10.MinimumWidth = 6;
             this.Column10.Name = "Column10";
             this.Column10.Width = 75;
