@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Basketics));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.matchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.playersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -39,7 +40,8 @@
             this.menuStrip1.AllowDrop = true;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.matchToolStripMenuItem});
+            this.matchToolStripMenuItem,
+            this.playersToolStripMenuItem});
             resources.ApplyResources(this.menuStrip1, "menuStrip1");
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
@@ -49,6 +51,12 @@
             this.matchToolStripMenuItem.Name = "matchToolStripMenuItem";
             resources.ApplyResources(this.matchToolStripMenuItem, "matchToolStripMenuItem");
             this.matchToolStripMenuItem.Click += new System.EventHandler(this.matchToolStripMenuItem_Click);
+            // 
+            // playersToolStripMenuItem
+            // 
+            this.playersToolStripMenuItem.Name = "playersToolStripMenuItem";
+            resources.ApplyResources(this.playersToolStripMenuItem, "playersToolStripMenuItem");
+            this.playersToolStripMenuItem.Click += new System.EventHandler(this.playersToolStripMenuItem_Click);
             // 
             // Basketics
             // 
@@ -71,5 +79,6 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem matchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem playersToolStripMenuItem;
     }
 }

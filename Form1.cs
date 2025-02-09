@@ -16,9 +16,16 @@ namespace Basktics_v2._0
             matchForm.Show();
         }
 
+        private void playersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PlayerForm playerForm = new PlayerForm();
+            playerForm.Show();
+        }
         private void Basketics_Load(object sender, EventArgs e)
         {
             // Any initialization code can go here
         }
+
+
     }
 }
