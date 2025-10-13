@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using OfficeOpenXml;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -93,26 +94,6 @@ namespace Basktics_v2._0
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
@@ -130,8 +111,31 @@ namespace Basktics_v2._0
             this.Column21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.basketicsBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.textBox3 = new System.Windows.Forms.TextBox();
+            this.basketicsBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column24 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column25 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -175,158 +179,21 @@ namespace Basktics_v2._0
             this.Column7,
             this.Column8,
             this.Column9,
-            this.Column10,
+            this.Column26,
+            this.Column24,
+            this.Column25,
             this.Column13,
             this.Column11,
             this.Column12,
-            this.Column20});
-            this.dataGridView1.Location = new System.Drawing.Point(101, 252);
+            this.Column20,
+            this.Column10});
+            this.dataGridView1.Location = new System.Drawing.Point(52, 261);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(1351, 353);
+            this.dataGridView1.Size = new System.Drawing.Size(1446, 353);
             this.dataGridView1.TabIndex = 2;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "Player";
-            this.Column1.MinimumWidth = 6;
-            this.Column1.Name = "Column1";
-            this.Column1.Width = 75;
-            // 
-            // Column14
-            // 
-            this.Column14.HeaderText = "Position";
-            this.Column14.MinimumWidth = 6;
-            this.Column14.Name = "Column14";
-            this.Column14.Width = 60;
-            // 
-            // Column2
-            // 
-            this.Column2.HeaderText = "LayUp Made";
-            this.Column2.MinimumWidth = 6;
-            this.Column2.Name = "Column2";
-            this.Column2.Width = 60;
-            // 
-            // Column15
-            // 
-            this.Column15.HeaderText = "LayUp Missed";
-            this.Column15.MinimumWidth = 6;
-            this.Column15.Name = "Column15";
-            this.Column15.Width = 60;
-            // 
-            // Column16
-            // 
-            this.Column16.HeaderText = "MidRange Made";
-            this.Column16.MinimumWidth = 6;
-            this.Column16.Name = "Column16";
-            this.Column16.Width = 75;
-            // 
-            // Column17
-            // 
-            this.Column17.HeaderText = "MidRange Missed";
-            this.Column17.MinimumWidth = 6;
-            this.Column17.Name = "Column17";
-            this.Column17.Width = 75;
-            // 
-            // Column3
-            // 
-            this.Column3.HeaderText = "3-point";
-            this.Column3.MinimumWidth = 6;
-            this.Column3.Name = "Column3";
-            this.Column3.Width = 65;
-            // 
-            // Column18
-            // 
-            this.Column18.HeaderText = "3-point Missed";
-            this.Column18.MinimumWidth = 6;
-            this.Column18.Name = "Column18";
-            this.Column18.Width = 65;
-            // 
-            // Column19
-            // 
-            this.Column19.HeaderText = "Ft missed";
-            this.Column19.MinimumWidth = 6;
-            this.Column19.Name = "Column19";
-            this.Column19.Width = 65;
-            // 
-            // Column4
-            // 
-            this.Column4.HeaderText = "Free Throws";
-            this.Column4.MinimumWidth = 6;
-            this.Column4.Name = "Column4";
-            this.Column4.Width = 65;
-            // 
-            // Column5
-            // 
-            this.Column5.HeaderText = "Off. Rebounds";
-            this.Column5.MinimumWidth = 6;
-            this.Column5.Name = "Column5";
-            this.Column5.Width = 75;
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "Def. Rebounds";
-            this.Column6.MinimumWidth = 6;
-            this.Column6.Name = "Column6";
-            this.Column6.Width = 75;
-            // 
-            // Column7
-            // 
-            this.Column7.HeaderText = "Assists";
-            this.Column7.MinimumWidth = 6;
-            this.Column7.Name = "Column7";
-            this.Column7.Width = 55;
-            // 
-            // Column8
-            // 
-            this.Column8.HeaderText = "Steals";
-            this.Column8.MinimumWidth = 6;
-            this.Column8.Name = "Column8";
-            this.Column8.Width = 50;
-            // 
-            // Column9
-            // 
-            this.Column9.HeaderText = "Blocks";
-            this.Column9.MinimumWidth = 6;
-            this.Column9.Name = "Column9";
-            this.Column9.Width = 55;
-            // 
-            // Column10
-            // 
-            this.Column10.HeaderText = "Faults";
-            this.Column10.MinimumWidth = 6;
-            this.Column10.Name = "Column10";
-            this.Column10.Width = 55;
-            // 
-            // Column13
-            // 
-            this.Column13.HeaderText = "Turnover";
-            this.Column13.MinimumWidth = 6;
-            this.Column13.Name = "Column13";
-            this.Column13.Width = 75;
-            // 
-            // Column11
-            // 
-            this.Column11.HeaderText = "Points";
-            this.Column11.MinimumWidth = 6;
-            this.Column11.Name = "Column11";
-            this.Column11.Width = 65;
-            // 
-            // Column12
-            // 
-            this.Column12.HeaderText = "Rebounds";
-            this.Column12.MinimumWidth = 6;
-            this.Column12.Name = "Column12";
-            this.Column12.Width = 75;
-            // 
-            // Column20
-            // 
-            this.Column20.HeaderText = "PIR";
-            this.Column20.MinimumWidth = 6;
-            this.Column20.Name = "Column20";
-            this.Column20.Width = 50;
             // 
             // textBox1
             // 
@@ -449,7 +316,7 @@ namespace Basktics_v2._0
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(666, 12);
+            this.btnSave.Location = new System.Drawing.Point(669, 12);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 45);
             this.btnSave.TabIndex = 15;
@@ -464,12 +331,13 @@ namespace Basktics_v2._0
             this.Column21,
             this.Column22,
             this.Column23});
-            this.Summary.Location = new System.Drawing.Point(101, 31);
+            this.Summary.Location = new System.Drawing.Point(52, 31);
             this.Summary.Name = "Summary";
             this.Summary.RowHeadersWidth = 51;
             this.Summary.RowTemplate.Height = 24;
-            this.Summary.Size = new System.Drawing.Size(243, 172);
+            this.Summary.Size = new System.Drawing.Size(247, 189);
             this.Summary.TabIndex = 16;
+            this.Summary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Summary_CellContentClick);
             // 
             // Column21
             // 
@@ -494,23 +362,184 @@ namespace Basktics_v2._0
             this.Column23.ReadOnly = true;
             this.Column23.Width = 70;
             // 
-            // basketicsBindingSource
-            // 
-            this.basketicsBindingSource.DataSource = typeof(Basktics_v2._0.Basketics);
-            // 
             // textBox3
             // 
             this.textBox3.Font = new System.Drawing.Font("Stencil", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox3.Location = new System.Drawing.Point(135, 1);
+            this.textBox3.Location = new System.Drawing.Point(97, 2);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(175, 23);
             this.textBox3.TabIndex = 17;
             this.textBox3.Text = "Points from Position";
             this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // basketicsBindingSource
+            // 
+            this.basketicsBindingSource.DataSource = typeof(Basktics_v2._0.Basketics);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "Player";
+            this.Column1.MinimumWidth = 6;
+            this.Column1.Name = "Column1";
+            this.Column1.Width = 75;
+            // 
+            // Column14
+            // 
+            this.Column14.HeaderText = "Position";
+            this.Column14.MinimumWidth = 6;
+            this.Column14.Name = "Column14";
+            this.Column14.Width = 60;
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "LayUp Made";
+            this.Column2.MinimumWidth = 6;
+            this.Column2.Name = "Column2";
+            this.Column2.Width = 50;
+            // 
+            // Column15
+            // 
+            this.Column15.HeaderText = "LayUp Missed";
+            this.Column15.MinimumWidth = 6;
+            this.Column15.Name = "Column15";
+            this.Column15.Width = 55;
+            // 
+            // Column16
+            // 
+            this.Column16.HeaderText = "MidRange Made";
+            this.Column16.MinimumWidth = 6;
+            this.Column16.Name = "Column16";
+            this.Column16.Width = 65;
+            // 
+            // Column17
+            // 
+            this.Column17.HeaderText = "MidRange Missed";
+            this.Column17.MinimumWidth = 6;
+            this.Column17.Name = "Column17";
+            this.Column17.Width = 65;
+            // 
+            // Column3
+            // 
+            this.Column3.HeaderText = "3-point";
+            this.Column3.MinimumWidth = 6;
+            this.Column3.Name = "Column3";
+            this.Column3.Width = 55;
+            // 
+            // Column18
+            // 
+            this.Column18.HeaderText = "3-point Missed";
+            this.Column18.MinimumWidth = 6;
+            this.Column18.Name = "Column18";
+            this.Column18.Width = 60;
+            // 
+            // Column19
+            // 
+            this.Column19.HeaderText = "Ft missed";
+            this.Column19.MinimumWidth = 6;
+            this.Column19.Name = "Column19";
+            this.Column19.Width = 60;
+            // 
+            // Column4
+            // 
+            this.Column4.HeaderText = "Free Throws";
+            this.Column4.MinimumWidth = 6;
+            this.Column4.Name = "Column4";
+            this.Column4.Width = 65;
+            // 
+            // Column5
+            // 
+            this.Column5.HeaderText = "Off. Rebounds";
+            this.Column5.MinimumWidth = 6;
+            this.Column5.Name = "Column5";
+            this.Column5.Width = 70;
+            // 
+            // Column6
+            // 
+            this.Column6.HeaderText = "Def. Rebounds";
+            this.Column6.MinimumWidth = 6;
+            this.Column6.Name = "Column6";
+            this.Column6.Width = 70;
+            // 
+            // Column7
+            // 
+            this.Column7.HeaderText = "Assists";
+            this.Column7.MinimumWidth = 6;
+            this.Column7.Name = "Column7";
+            this.Column7.Width = 55;
+            // 
+            // Column8
+            // 
+            this.Column8.HeaderText = "Steals";
+            this.Column8.MinimumWidth = 6;
+            this.Column8.Name = "Column8";
+            this.Column8.Width = 50;
+            // 
+            // Column9
+            // 
+            this.Column9.HeaderText = "Blocks";
+            this.Column9.MinimumWidth = 6;
+            this.Column9.Name = "Column9";
+            this.Column9.Width = 50;
+            // 
+            // Column26
+            // 
+            this.Column26.HeaderText = "Shots Rejected";
+            this.Column26.MinimumWidth = 6;
+            this.Column26.Name = "Column26";
+            this.Column26.Width = 65;
+            // 
+            // Column24
+            // 
+            this.Column24.HeaderText = "Fouls Drawn";
+            this.Column24.MinimumWidth = 6;
+            this.Column24.Name = "Column24";
+            this.Column24.Width = 55;
+            // 
+            // Column25
+            // 
+            this.Column25.HeaderText = "Fouls Committed";
+            this.Column25.MinimumWidth = 6;
+            this.Column25.Name = "Column25";
+            this.Column25.Width = 70;
+            // 
+            // Column13
+            // 
+            this.Column13.HeaderText = "Turnover";
+            this.Column13.MinimumWidth = 6;
+            this.Column13.Name = "Column13";
+            this.Column13.Width = 65;
+            // 
+            // Column11
+            // 
+            this.Column11.HeaderText = "Points";
+            this.Column11.MinimumWidth = 6;
+            this.Column11.Name = "Column11";
+            this.Column11.Width = 50;
+            // 
+            // Column12
+            // 
+            this.Column12.HeaderText = "Rebounds";
+            this.Column12.MinimumWidth = 6;
+            this.Column12.Name = "Column12";
+            this.Column12.Width = 70;
+            // 
+            // Column20
+            // 
+            this.Column20.HeaderText = "PIR";
+            this.Column20.MinimumWidth = 6;
+            this.Column20.Name = "Column20";
+            this.Column20.Width = 50;
+            // 
+            // Column10
+            // 
+            this.Column10.HeaderText = "AST/TO";
+            this.Column10.MinimumWidth = 6;
+            this.Column10.Name = "Column10";
+            this.Column10.Width = 60;
+            // 
             // MatchForm
             // 
-            this.ClientSize = new System.Drawing.Size(1635, 638);
+            this.ClientSize = new System.Drawing.Size(1812, 638);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.Summary);
             this.Controls.Add(this.btnSave);
@@ -618,10 +647,54 @@ namespace Basktics_v2._0
                     // "Store the sum in column 12 (Points)."
                     row.Cells["Column12"].Value = sum;
                 }
-            }
+
+                if(e.ColumnIndex == this.Column11.Index || e.ColumnIndex == this.Column12.Index || e.ColumnIndex == this.Column7.Index || e.ColumnIndex == this.Column8.Index || e.ColumnIndex == this.Column9.Index || e.ColumnIndex == this.Column24.Index || e.ColumnIndex == this.Column15.Index || e.ColumnIndex == this.Column17.Index || e.ColumnIndex == this.Column18.Index || e.ColumnIndex == this.Column19.Index || e.ColumnIndex == this.Column13.Index || e.ColumnIndex == this.Column25.Index || e.ColumnIndex == this.Column26.Index || e.ColumnIndex == this.Column20.Index)
+                {
+                    DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+
+                    int points = Convert.ToInt32(row.Cells["Column11"].Value ?? 0);
+                    int rebounds = Convert.ToInt32(row.Cells["Column12"].Value ?? 0);
+                    int assists = Convert.ToInt32(row.Cells["Column7"].Value ?? 0);
+                    int steals = Convert.ToInt32(row.Cells["Column8"].Value ?? 0);
+                    int blocks = Convert.ToInt32(row.Cells["Column9"].Value ?? 0);
+                    int foulsdrawn = Convert.ToInt32(row.Cells["Column24"].Value ?? 0);
+                    int missedlayups = Convert.ToInt32(row.Cells["Column15"].Value ?? 0);
+                    int missedmidrange = Convert.ToInt32(row.Cells["Column17"].Value ?? 0);
+                    int threepointmissed = Convert.ToInt32(row.Cells["Column18"].Value ?? 0);
+                    int ftmissed = Convert.ToInt32(row.Cells["Column19"].Value ?? 0);
+                    int turnovers = Convert.ToInt32(row.Cells["Column13"].Value ?? 0);
+                    int shotsrejected = Convert.ToInt32(row.Cells["Column26"].Value ?? 0);
+                    int foulscommited = Convert.ToInt32(row.Cells["Column25"].Value ?? 0);
+                    
+                    int pir = points + rebounds + assists + steals + blocks + foulsdrawn - missedlayups - missedmidrange - threepointmissed - ftmissed - turnovers - shotsrejected - foulscommited;
+
+                    // "Store the pir in column 20 (PIR)."
+                    row.Cells["Column20"].Value = pir;
+                }
+                if (e.ColumnIndex == this.Column10.Index || e.ColumnIndex == this.Column13.Index || e.ColumnIndex == this.Column7.Index)
+                {
+                    DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+                    double assists = Convert.ToDouble(row.Cells["Column7"].Value ?? 0);
+                    double turnover = Convert.ToDouble(row.Cells["Column13"].Value ?? 0);
+
+                    double astto;
+                    if (turnover == 0)
+                    {
+                        astto = assists; 
+                    }
+                    else
+                    {
+                        astto = assists / turnover;
+                    }
+                    row.Cells["Column10"].Value = Math.Round(astto, 2);
+                }
+
+
+                        }
             CalculatePointsForPositionSummary();
 
         }
+
         private void CalculatePointsForPositionSummary()
         {
             Summary.Rows.Clear();
@@ -754,6 +827,19 @@ namespace Basktics_v2._0
 
         }
         private Button btnSave;
+        private DataGridView Summary;
+        private BindingSource basketicsBindingSource;
+        private IContainer components;
+        private DataGridViewTextBoxColumn Column21;
+        private DataGridViewTextBoxColumn Column22;
+        private DataGridViewTextBoxColumn Column23;
+        private TextBox textBox3;
+
+        private void Summary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
         private DataGridViewTextBoxColumn Column1;
         private DataGridViewTextBoxColumn Column14;
         private DataGridViewTextBoxColumn Column2;
@@ -769,17 +855,13 @@ namespace Basktics_v2._0
         private DataGridViewTextBoxColumn Column7;
         private DataGridViewTextBoxColumn Column8;
         private DataGridViewTextBoxColumn Column9;
-        private DataGridViewTextBoxColumn Column10;
+        private DataGridViewTextBoxColumn Column26;
+        private DataGridViewTextBoxColumn Column24;
+        private DataGridViewTextBoxColumn Column25;
         private DataGridViewTextBoxColumn Column13;
         private DataGridViewTextBoxColumn Column11;
         private DataGridViewTextBoxColumn Column12;
         private DataGridViewTextBoxColumn Column20;
-        private DataGridView Summary;
-        private BindingSource basketicsBindingSource;
-        private IContainer components;
-        private DataGridViewTextBoxColumn Column21;
-        private DataGridViewTextBoxColumn Column22;
-        private DataGridViewTextBoxColumn Column23;
-        private TextBox textBox3;
+        private DataGridViewTextBoxColumn Column10;
     }
 }
