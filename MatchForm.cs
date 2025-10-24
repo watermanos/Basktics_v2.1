@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -18,17 +19,37 @@ namespace Basktics_v2._0
         public MatchForm()
         {
             InitializeComponent();
-
+            
+            // Event handlers για υπάρχοντα controls
             this.dataGridView1.CellValueChanged += new DataGridViewCellEventHandler(dataGridView1_CellValueChanged);
             this.dataGridView1.EditingControlShowing += new DataGridViewEditingControlShowingEventHandler(dataGridView1_EditingControlShowing1);
-           // this.FormClosing += new FormClosingEventHandler(MatchForm_FormClosing);
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
 
+            // Timer initialization
+            gameTimer = new System.Windows.Forms.Timer();
+            gameTimer.Interval = 1000;
+            gameTimer.Tick += GameTimer_Tick;
+
+            currentGameTime = TimeSpan.FromMinutes(40);
+            isTimerRunning = false;
+
+            playerTotalTime = new Dictionary<string, TimeSpan>();
+            playerStartTimes = new Dictionary<string, DateTime>();
+            activePlayers = new List<string>();
+
+            // Event handlers για τα νέα κουμπιά
+            this.btnStartTimer.Click += new System.EventHandler(this.btnStartTimer_Click);
+            this.btnPauseTimer.Click += new System.EventHandler(this.btnPauseTimer_Click);
+            this.btnResetTimer.Click += new System.EventHandler(this.btnResetTimer_Click);
+            this.btnSubstitute.Click += new System.EventHandler(this.btnSubstitute_Click);
+            //this.btnSetStartingFive.Click += new System.EventHandler(this.btnSetStartingFive_Click);
+
+            // Ενεργοποίηση των events για summary
             this.dataGridView1.CellValueChanged += (s, e) =>
             {
                 if (e.RowIndex >= 0 &&
-                   (dataGridView1.Columns[e.ColumnIndex].Name == "Column11" || // Points
-                    dataGridView1.Columns[e.ColumnIndex].Name == "Column14"))  // Position
+                   (dataGridView1.Columns[e.ColumnIndex].Name == "Column11" ||
+                    dataGridView1.Columns[e.ColumnIndex].Name == "Column14"))
                 {
                     CalculatePointsForPositionSummary();
                 }
@@ -37,25 +58,315 @@ namespace Basktics_v2._0
             this.dataGridView1.RowsAdded += (s, e) => CalculatePointsForPositionSummary();
             this.dataGridView1.RowsRemoved += (s, e) => CalculatePointsForPositionSummary();
 
+            // Αρχικοποίηση εμφάνισης
+            UpdateGameTimeDisplay();
+            lblTimerStatus.Text = "GAME CLOCK";
 
+            btnStartTimer.Enabled = false;
         }
-        private void MatchForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            //Displays the file save dialog.
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                saveFileDialog.Filter = "Excel Files|*.xlsx";
-                saveFileDialog.Title = "Save Match Data to Excel File";
-                saveFileDialog.FileName = "MatchData.xlsx";
 
-                // If the user clicks OK, it saves the Excel file.
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        private void SetStartingFiveAutomatically()
+        {
+            activePlayers.Clear();
+            playerTotalTime.Clear();
+            playerStartTimes.Clear();
+
+            int playersAdded = 0;
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (playersAdded >= 5) break;
+
+                // Έλεγχος αν η γραμμή δεν είναι new row και αν έχει όνομα παίκτη
+                if (!row.IsNewRow && row.Cells["Column1"].Value != null &&
+                    !string.IsNullOrWhiteSpace(row.Cells["Column1"].Value.ToString()))
                 {
-                    this.SaveDataToExcel(saveFileDialog.FileName);
+                    string playerName = row.Cells["Column1"].Value.ToString().Trim();
+                    if (!string.IsNullOrEmpty(playerName) && !activePlayers.Contains(playerName))
+                    {
+                        activePlayers.Add(playerName);
+                        playerTotalTime[playerName] = TimeSpan.Zero;
+                        playersAdded++;
+                    }
+                }
+            }
+
+            // Ενημέρωση εμφάνισης
+            UpdateActivePlayersList();
+            UpdatePlayingTimeInGrid();
+            RefreshPlayersComboBox();
+
+            // Ενεργοποίηση Play μόνο αν υπάρχουν 5 παίκτες
+            btnStartTimer.Enabled = (activePlayers.Count == 5);
+        }
+
+
+
+        private void RefreshPlayersComboBox()
+        {
+            if (cmbPlayersOut == null || cmbPlayersIn == null) return;
+
+            cmbPlayersOut.Items.Clear();
+            cmbPlayersIn.Items.Clear();
+
+           
+            cmbPlayersOut.Items.Add("-- Select Player --");
+            cmbPlayersIn.Items.Add("-- Select Player --");
+
+
+            foreach (string player in activePlayers)
+            {
+                cmbPlayersOut.Items.Add(player);
+            }
+
+
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (!row.IsNewRow && row.Cells["Column1"].Value != null)
+                {
+                    string playerName = row.Cells["Column1"].Value.ToString().Trim();
+                    if (!string.IsNullOrEmpty(playerName) && !activePlayers.Contains(playerName))
+                    {
+                        cmbPlayersIn.Items.Add(playerName);
+                    }
+                }
+            }
+            if (cmbPlayersOut.Items.Count > 0) cmbPlayersOut.SelectedIndex = 0;
+            if (cmbPlayersIn.Items.Count > 0) cmbPlayersIn.SelectedIndex = 0;
+        }
+
+        private void GameTimer_Tick(object sender, EventArgs e)
+        {
+            if (currentGameTime.TotalSeconds > 0)
+            {
+                currentGameTime = currentGameTime.Subtract(TimeSpan.FromSeconds(1));
+                UpdateGameTimeDisplay();
+                UpdateActivePlayersTime();
+            }
+            else
+            {
+                gameTimer.Stop();
+                isTimerRunning = false;
+                lblTimerStatus.Text = "FINISHED";
+            }
+        }
+
+        private void UpdateGameTimeDisplay()
+        {
+            if (lblGameClock != null)
+            {
+                lblGameClock.Text = currentGameTime.ToString(@"mm\:ss");
+            }
+        }
+
+        private void UpdateActivePlayersTime()
+        {
+            if (!isTimerRunning) return;
+
+            DateTime currentTime = DateTime.Now;
+
+            foreach (var player in activePlayers)
+            {
+                if (playerStartTimes.ContainsKey(player))
+                {
+                    TimeSpan elapsed = currentTime - playerStartTimes[player];
+                    if (playerTotalTime.ContainsKey(player))
+                    {
+                        playerTotalTime[player] += elapsed;
+                    }
+                    playerStartTimes[player] = currentTime;
+                }
+            }
+
+            UpdateActivePlayersList();
+            UpdatePlayingTimeInGrid();
+        }
+
+        private void UpdatePlayingTimeInGrid()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                DataGridViewCell playerCell = row.Cells["Column1"];
+                if (playerCell?.Value != null)
+                {
+                    string playerName = playerCell.Value.ToString();
+                    if (playerTotalTime.ContainsKey(playerName))
+                    {
+                        row.Cells["ColumnPlayingTime"].Value = playerTotalTime[playerName].ToString(@"mm\:ss");
+                    }
+                    else
+                    {
+                        row.Cells["ColumnPlayingTime"].Value = "00:00";
+                    }
+                }
+            }
+        }
+        private void UpdatePlayersTime()
+        {
+            // Για κάθε ενεργό παίκτη, ενημερώνουμε τον χρόνο
+            foreach (string player in activePlayers)
+            {
+                if (playerStartTimes.ContainsKey(player))
+                {
+                    TimeSpan elapsed = DateTime.Now - playerStartTimes[player];
+                    playerTotalTime[player] = playerTotalTime[player].Add(elapsed);
+                    playerStartTimes[player] = DateTime.Now;
+                }
+            }
+
+            // Ενημέρωση εμφάνισης χρόνου στον πίνακα
+            UpdatePlayingTimeInGrid();
+            UpdateActivePlayersList();
+        }
+
+       
+        private void UpdateActivePlayersList()
+        {
+            if (lstActivePlayers == null) return;
+
+            lstActivePlayers.Items.Clear();
+            foreach (string player in activePlayers)
+            {
+                if (playerTotalTime.ContainsKey(player))
+                {
+                    string timeStr = playerTotalTime[player].ToString(@"mm\:ss");
+                    lstActivePlayers.Items.Add($"{player} - {timeStr}");
+                }
+                else
+                {
+                    lstActivePlayers.Items.Add($"{player} - 00:00");
                 }
             }
         }
 
+
+
+        private void btnStartTimer_Click(object sender, EventArgs e)
+        {
+            if (activePlayers.Count != 5)
+            {
+                MessageBox.Show("Please ensure there are exactly 5 players with names in the first five rows.", "Game Start", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!isTimerRunning)
+            {
+                gameTimer.Start();
+                isTimerRunning = true;
+                lastUpdateTime = DateTime.Now;
+                lblTimerStatus.Text = "RUNNING";
+
+                foreach (var player in activePlayers)
+                {
+                    playerStartTimes[player] = DateTime.Now;
+                }
+            }
+        }
+
+        private void btnPauseTimer_Click(object sender, EventArgs e)
+        {
+            if (isTimerRunning)
+            {
+                gameTimer.Stop();
+                isTimerRunning = false;
+                lblTimerStatus.Text = "PAUSED";
+
+                // Ενημέρωση συνολικού χρόνου για ενεργούς παίκτες
+                UpdateActivePlayersTime();
+            }
+        }
+
+        private void btnResetTimer_Click(object sender, EventArgs e)
+        {
+            gameTimer.Stop();
+            isTimerRunning = false;
+            currentGameTime = TimeSpan.FromMinutes(40);
+            lblTimerStatus.Text = "STOPPED";
+
+            // Επαναφορά χρόνων
+            playerTotalTime.Clear();
+            playerStartTimes.Clear();
+            activePlayers.Clear();
+
+            // Αυτόματη επαναφορά πρώτων 5 παικτών
+            SetStartingFiveAutomatically();
+
+            UpdateGameTimeDisplay();
+            UpdateActivePlayersList();
+            UpdatePlayingTimeInGrid();
+            RefreshPlayersComboBox();
+        }
+
+        private void btnSubstitute_Click(object sender, EventArgs e)
+        {
+            if (cmbPlayersOut.SelectedIndex <= 0 || cmbPlayersIn.SelectedIndex <= 0)
+            {
+                MessageBox.Show("Please select both players for substitution.", "Substitution", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string playerOut = cmbPlayersOut.SelectedItem.ToString();
+            string playerIn = cmbPlayersIn.SelectedItem.ToString();
+
+            // Έλεγχος αν ο παίκτης που βγαίνει είναι ενεργός
+            if (!activePlayers.Contains(playerOut))
+            {
+                MessageBox.Show($"{playerOut} is not in the active players list.", "Substitution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Έλεγχος αν ο παίκτης που μπαίνει είναι ήδη ενεργός
+            if (activePlayers.Contains(playerIn))
+            {
+                MessageBox.Show($"{playerIn} is already in the active players list.", "Substitution Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Ανανέωση χρόνου πριν την αλλαγή
+            if (isTimerRunning)
+            {
+                UpdateActivePlayersTime();
+            }
+
+            // Αλλαγή παίκτη
+            activePlayers.Remove(playerOut);
+            playerStartTimes.Remove(playerOut);
+
+            activePlayers.Add(playerIn);
+            if (!playerTotalTime.ContainsKey(playerIn))
+            {
+                playerTotalTime[playerIn] = TimeSpan.Zero;
+            }
+
+            if (isTimerRunning)
+            {
+                playerStartTimes[playerIn] = DateTime.Now;
+            }
+
+            // Ενημέρωση εμφάνισης
+            UpdateActivePlayersList();
+            UpdatePlayingTimeInGrid();
+
+            // Επαναφορά selections
+            cmbPlayersOut.SelectedIndex = 0;
+            cmbPlayersIn.SelectedIndex = 0;
+
+            // Ενημέρωση των combo boxes με βάση την τρέχουσα λίστα activePlayers
+            RefreshPlayersComboBox();
+
+            MessageBox.Show($"Substitution: {playerOut} → {playerIn}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+
+        private System.Windows.Forms.Timer gameTimer;
+        private TimeSpan currentGameTime;
+        private bool isGameRunning;
+        private Dictionary<string, TimeSpan> playerTotalTime;
+        private Dictionary<string, DateTime> playerStartTimes;
+        private List<string> activePlayers;
+        private bool isTimerRunning;
+        private DateTime lastUpdateTime;
         private void SaveDataToExcelb(string filePath)
         {
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -94,25 +405,6 @@ namespace Basktics_v2._0
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
-            this.checkBox6 = new System.Windows.Forms.CheckBox();
-            this.checkBox7 = new System.Windows.Forms.CheckBox();
-            this.checkBox8 = new System.Windows.Forms.CheckBox();
-            this.checkBox9 = new System.Windows.Forms.CheckBox();
-            this.checkBox10 = new System.Windows.Forms.CheckBox();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.Summary = new System.Windows.Forms.DataGridView();
-            this.Column21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.basketicsBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -136,10 +428,50 @@ namespace Basktics_v2._0
             this.Column12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnPlayingTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
+            this.checkBox7 = new System.Windows.Forms.CheckBox();
+            this.checkBox8 = new System.Windows.Forms.CheckBox();
+            this.checkBox9 = new System.Windows.Forms.CheckBox();
+            this.checkBox10 = new System.Windows.Forms.CheckBox();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.Summary = new System.Windows.Forms.DataGridView();
+            this.Column21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.lblGameClock = new System.Windows.Forms.Label();
+            this.btnStartTimer = new System.Windows.Forms.Button();
+            this.btnPauseTimer = new System.Windows.Forms.Button();
+            this.btnResetTimer = new System.Windows.Forms.Button();
+            this.cmbPlayersOut = new System.Windows.Forms.ComboBox();
+            this.cmbPlayersIn = new System.Windows.Forms.ComboBox();
+            this.btnSubstitute = new System.Windows.Forms.Button();
+            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.textBox6 = new System.Windows.Forms.TextBox();
+            this.lblTimerStatus = new System.Windows.Forms.Label();
+            this.groupBoxActivePlayers = new System.Windows.Forms.Label();
+            this.lblSubstitutions = new System.Windows.Forms.Label();
+            this.lstActivePlayers = new System.Windows.Forms.ListBox();
+            this.groupBoxTimer = new System.Windows.Forms.GroupBox();
+            this.groupActiveplr = new System.Windows.Forms.GroupBox();
+            this.groupBoxSubstitutions = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.basketicsBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Summary)).BeginInit();
+            this.groupBoxTimer.SuspendLayout();
+            this.groupActiveplr.SuspendLayout();
+            this.groupBoxSubstitutions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.basketicsBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
@@ -186,195 +518,15 @@ namespace Basktics_v2._0
             this.Column11,
             this.Column12,
             this.Column20,
-            this.Column10});
-            this.dataGridView1.Location = new System.Drawing.Point(52, 261);
+            this.Column10,
+            this.ColumnPlayingTime});
+            this.dataGridView1.Location = new System.Drawing.Point(12, 261);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(1446, 353);
+            this.dataGridView1.Size = new System.Drawing.Size(1489, 353);
             this.dataGridView1.TabIndex = 2;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(575, 57);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(68, 22);
-            this.textBox1.TabIndex = 3;
-            this.textBox1.Text = "Home";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(765, 57);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(68, 22);
-            this.textBox2.TabIndex = 4;
-            this.textBox2.Text = "Away";
-            this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(578, 122);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(65, 20);
-            this.checkBox1.TabIndex = 5;
-            this.checkBox1.Text = "Foul 1";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // checkBox2
-            // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(578, 148);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(65, 20);
-            this.checkBox2.TabIndex = 6;
-            this.checkBox2.Text = "Foul 2";
-            this.checkBox2.UseVisualStyleBackColor = true;
-            // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(578, 174);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(65, 20);
-            this.checkBox3.TabIndex = 7;
-            this.checkBox3.Text = "Foul 3";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            // 
-            // checkBox4
-            // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(578, 200);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(65, 20);
-            this.checkBox4.TabIndex = 8;
-            this.checkBox4.Text = "Foul 4";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            // 
-            // checkBox5
-            // 
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Location = new System.Drawing.Point(578, 226);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(65, 20);
-            this.checkBox5.TabIndex = 9;
-            this.checkBox5.Text = "Foul 5";
-            this.checkBox5.UseVisualStyleBackColor = true;
-            // 
-            // checkBox6
-            // 
-            this.checkBox6.AutoSize = true;
-            this.checkBox6.Location = new System.Drawing.Point(765, 226);
-            this.checkBox6.Name = "checkBox6";
-            this.checkBox6.Size = new System.Drawing.Size(65, 20);
-            this.checkBox6.TabIndex = 14;
-            this.checkBox6.Text = "Foul 5";
-            this.checkBox6.UseVisualStyleBackColor = true;
-            // 
-            // checkBox7
-            // 
-            this.checkBox7.AutoSize = true;
-            this.checkBox7.Location = new System.Drawing.Point(765, 200);
-            this.checkBox7.Name = "checkBox7";
-            this.checkBox7.Size = new System.Drawing.Size(65, 20);
-            this.checkBox7.TabIndex = 13;
-            this.checkBox7.Text = "Foul 4";
-            this.checkBox7.UseVisualStyleBackColor = true;
-            this.checkBox7.CheckedChanged += new System.EventHandler(this.checkBox7_CheckedChanged);
-            // 
-            // checkBox8
-            // 
-            this.checkBox8.AutoSize = true;
-            this.checkBox8.Location = new System.Drawing.Point(765, 174);
-            this.checkBox8.Name = "checkBox8";
-            this.checkBox8.Size = new System.Drawing.Size(65, 20);
-            this.checkBox8.TabIndex = 12;
-            this.checkBox8.Text = "Foul 3";
-            this.checkBox8.UseVisualStyleBackColor = true;
-            // 
-            // checkBox9
-            // 
-            this.checkBox9.AutoSize = true;
-            this.checkBox9.Location = new System.Drawing.Point(765, 148);
-            this.checkBox9.Name = "checkBox9";
-            this.checkBox9.Size = new System.Drawing.Size(65, 20);
-            this.checkBox9.TabIndex = 11;
-            this.checkBox9.Text = "Foul 2";
-            this.checkBox9.UseVisualStyleBackColor = true;
-            // 
-            // checkBox10
-            // 
-            this.checkBox10.AutoSize = true;
-            this.checkBox10.Location = new System.Drawing.Point(765, 122);
-            this.checkBox10.Name = "checkBox10";
-            this.checkBox10.Size = new System.Drawing.Size(65, 20);
-            this.checkBox10.TabIndex = 10;
-            this.checkBox10.Text = "Foul 1";
-            this.checkBox10.UseVisualStyleBackColor = true;
-            // 
-            // btnSave
-            // 
-            this.btnSave.Location = new System.Drawing.Point(669, 12);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(75, 45);
-            this.btnSave.TabIndex = 15;
-            this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
-            // 
-            // Summary
-            // 
-            this.Summary.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
-            this.Summary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.Summary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column21,
-            this.Column22,
-            this.Column23});
-            this.Summary.Location = new System.Drawing.Point(52, 31);
-            this.Summary.Name = "Summary";
-            this.Summary.RowHeadersWidth = 51;
-            this.Summary.RowTemplate.Height = 24;
-            this.Summary.Size = new System.Drawing.Size(247, 189);
-            this.Summary.TabIndex = 16;
-            this.Summary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Summary_CellContentClick);
-            // 
-            // Column21
-            // 
-            this.Column21.HeaderText = "Position";
-            this.Column21.MinimumWidth = 6;
-            this.Column21.Name = "Column21";
-            this.Column21.Width = 60;
-            // 
-            // Column22
-            // 
-            this.Column22.HeaderText = "Total Score";
-            this.Column22.MinimumWidth = 6;
-            this.Column22.Name = "Column22";
-            this.Column22.ReadOnly = true;
-            this.Column22.Width = 60;
-            // 
-            // Column23
-            // 
-            this.Column23.HeaderText = "Avg Score";
-            this.Column23.MinimumWidth = 6;
-            this.Column23.Name = "Column23";
-            this.Column23.ReadOnly = true;
-            this.Column23.Width = 70;
-            // 
-            // textBox3
-            // 
-            this.textBox3.Font = new System.Drawing.Font("Stencil", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox3.Location = new System.Drawing.Point(97, 2);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(175, 23);
-            this.textBox3.TabIndex = 17;
-            this.textBox3.Text = "Points from Position";
-            this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // basketicsBindingSource
-            // 
-            this.basketicsBindingSource.DataSource = typeof(Basktics_v2._0.Basketics);
             // 
             // Column1
             // 
@@ -537,9 +689,376 @@ namespace Basktics_v2._0
             this.Column10.Name = "Column10";
             this.Column10.Width = 60;
             // 
+            // ColumnPlayingTime
+            // 
+            this.ColumnPlayingTime.HeaderText = "Time";
+            this.ColumnPlayingTime.MinimumWidth = 6;
+            this.ColumnPlayingTime.Name = "ColumnPlayingTime";
+            this.ColumnPlayingTime.Width = 40;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(575, 57);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(68, 22);
+            this.textBox1.TabIndex = 3;
+            this.textBox1.Text = "Home";
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(765, 57);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(68, 22);
+            this.textBox2.TabIndex = 4;
+            this.textBox2.Text = "Away";
+            this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(578, 122);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(65, 20);
+            this.checkBox1.TabIndex = 5;
+            this.checkBox1.Text = "Foul 1";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(578, 148);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(65, 20);
+            this.checkBox2.TabIndex = 6;
+            this.checkBox2.Text = "Foul 2";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(578, 174);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(65, 20);
+            this.checkBox3.TabIndex = 7;
+            this.checkBox3.Text = "Foul 3";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(578, 200);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(65, 20);
+            this.checkBox4.TabIndex = 8;
+            this.checkBox4.Text = "Foul 4";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Location = new System.Drawing.Point(578, 226);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(65, 20);
+            this.checkBox5.TabIndex = 9;
+            this.checkBox5.Text = "Foul 5";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Location = new System.Drawing.Point(765, 226);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(65, 20);
+            this.checkBox6.TabIndex = 14;
+            this.checkBox6.Text = "Foul 5";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            // 
+            // checkBox7
+            // 
+            this.checkBox7.AutoSize = true;
+            this.checkBox7.Location = new System.Drawing.Point(765, 200);
+            this.checkBox7.Name = "checkBox7";
+            this.checkBox7.Size = new System.Drawing.Size(65, 20);
+            this.checkBox7.TabIndex = 13;
+            this.checkBox7.Text = "Foul 4";
+            this.checkBox7.UseVisualStyleBackColor = true;
+            this.checkBox7.CheckedChanged += new System.EventHandler(this.checkBox7_CheckedChanged);
+            // 
+            // checkBox8
+            // 
+            this.checkBox8.AutoSize = true;
+            this.checkBox8.Location = new System.Drawing.Point(765, 174);
+            this.checkBox8.Name = "checkBox8";
+            this.checkBox8.Size = new System.Drawing.Size(65, 20);
+            this.checkBox8.TabIndex = 12;
+            this.checkBox8.Text = "Foul 3";
+            this.checkBox8.UseVisualStyleBackColor = true;
+            // 
+            // checkBox9
+            // 
+            this.checkBox9.AutoSize = true;
+            this.checkBox9.Location = new System.Drawing.Point(765, 148);
+            this.checkBox9.Name = "checkBox9";
+            this.checkBox9.Size = new System.Drawing.Size(65, 20);
+            this.checkBox9.TabIndex = 11;
+            this.checkBox9.Text = "Foul 2";
+            this.checkBox9.UseVisualStyleBackColor = true;
+            // 
+            // checkBox10
+            // 
+            this.checkBox10.AutoSize = true;
+            this.checkBox10.Location = new System.Drawing.Point(765, 122);
+            this.checkBox10.Name = "checkBox10";
+            this.checkBox10.Size = new System.Drawing.Size(65, 20);
+            this.checkBox10.TabIndex = 10;
+            this.checkBox10.Text = "Foul 1";
+            this.checkBox10.UseVisualStyleBackColor = true;
+            // 
+            // btnSave
+            // 
+            this.btnSave.Font = new System.Drawing.Font("Comic Sans MS", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.btnSave.Location = new System.Drawing.Point(669, 12);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 45);
+            this.btnSave.TabIndex = 15;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click_1);
+            // 
+            // Summary
+            // 
+            this.Summary.BackgroundColor = System.Drawing.SystemColors.ButtonFace;
+            this.Summary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.Summary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column21,
+            this.Column22,
+            this.Column23});
+            this.Summary.Location = new System.Drawing.Point(52, 31);
+            this.Summary.Name = "Summary";
+            this.Summary.RowHeadersWidth = 51;
+            this.Summary.RowTemplate.Height = 24;
+            this.Summary.Size = new System.Drawing.Size(247, 189);
+            this.Summary.TabIndex = 16;
+            this.Summary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Summary_CellContentClick);
+            // 
+            // Column21
+            // 
+            this.Column21.HeaderText = "Position";
+            this.Column21.MinimumWidth = 6;
+            this.Column21.Name = "Column21";
+            this.Column21.Width = 60;
+            // 
+            // Column22
+            // 
+            this.Column22.HeaderText = "Total Score";
+            this.Column22.MinimumWidth = 6;
+            this.Column22.Name = "Column22";
+            this.Column22.ReadOnly = true;
+            this.Column22.Width = 60;
+            // 
+            // Column23
+            // 
+            this.Column23.HeaderText = "Avg Score";
+            this.Column23.MinimumWidth = 6;
+            this.Column23.Name = "Column23";
+            this.Column23.ReadOnly = true;
+            this.Column23.Width = 70;
+            // 
+            // textBox3
+            // 
+            this.textBox3.Font = new System.Drawing.Font("Stencil", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox3.Location = new System.Drawing.Point(97, 2);
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(175, 23);
+            this.textBox3.TabIndex = 17;
+            this.textBox3.Text = "Points from Position";
+            this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // lblGameClock
+            // 
+            this.lblGameClock.AutoSize = true;
+            this.lblGameClock.Font = new System.Drawing.Font("Comic Sans MS", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.lblGameClock.Location = new System.Drawing.Point(76, 62);
+            this.lblGameClock.Name = "lblGameClock";
+            this.lblGameClock.Size = new System.Drawing.Size(114, 47);
+            this.lblGameClock.TabIndex = 18;
+            this.lblGameClock.Text = "00:00";
+            // 
+            // btnStartTimer
+            // 
+            this.btnStartTimer.Font = new System.Drawing.Font("Comic Sans MS", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.btnStartTimer.Location = new System.Drawing.Point(2, 117);
+            this.btnStartTimer.Name = "btnStartTimer";
+            this.btnStartTimer.Size = new System.Drawing.Size(75, 23);
+            this.btnStartTimer.TabIndex = 19;
+            this.btnStartTimer.Text = "Play";
+            this.btnStartTimer.UseVisualStyleBackColor = true;
+            this.btnStartTimer.Click += new System.EventHandler(this.btnStartTimer_Click_1);
+            // 
+            // btnPauseTimer
+            // 
+            this.btnPauseTimer.Font = new System.Drawing.Font("Comic Sans MS", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.btnPauseTimer.Location = new System.Drawing.Point(83, 117);
+            this.btnPauseTimer.Name = "btnPauseTimer";
+            this.btnPauseTimer.Size = new System.Drawing.Size(75, 23);
+            this.btnPauseTimer.TabIndex = 20;
+            this.btnPauseTimer.Text = "Pause";
+            this.btnPauseTimer.UseVisualStyleBackColor = true;
+            // 
+            // btnResetTimer
+            // 
+            this.btnResetTimer.Font = new System.Drawing.Font("Comic Sans MS", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.btnResetTimer.Location = new System.Drawing.Point(164, 117);
+            this.btnResetTimer.Name = "btnResetTimer";
+            this.btnResetTimer.Size = new System.Drawing.Size(75, 23);
+            this.btnResetTimer.TabIndex = 21;
+            this.btnResetTimer.Text = "Stop";
+            this.btnResetTimer.UseVisualStyleBackColor = true;
+            // 
+            // cmbPlayersOut
+            // 
+            this.cmbPlayersOut.FormattingEnabled = true;
+            this.cmbPlayersOut.Location = new System.Drawing.Point(95, 48);
+            this.cmbPlayersOut.Name = "cmbPlayersOut";
+            this.cmbPlayersOut.Size = new System.Drawing.Size(121, 24);
+            this.cmbPlayersOut.TabIndex = 23;
+            // 
+            // cmbPlayersIn
+            // 
+            this.cmbPlayersIn.FormattingEnabled = true;
+            this.cmbPlayersIn.Location = new System.Drawing.Point(95, 73);
+            this.cmbPlayersIn.Name = "cmbPlayersIn";
+            this.cmbPlayersIn.Size = new System.Drawing.Size(121, 24);
+            this.cmbPlayersIn.TabIndex = 24;
+            // 
+            // btnSubstitute
+            // 
+            this.btnSubstitute.Font = new System.Drawing.Font("Comic Sans MS", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.btnSubstitute.Location = new System.Drawing.Point(48, 102);
+            this.btnSubstitute.Name = "btnSubstitute";
+            this.btnSubstitute.Size = new System.Drawing.Size(121, 23);
+            this.btnSubstitute.TabIndex = 25;
+            this.btnSubstitute.Text = "Subtitution";
+            this.btnSubstitute.UseVisualStyleBackColor = true;
+            // 
+            // textBox5
+            // 
+            this.textBox5.Font = new System.Drawing.Font("Stencil", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox5.Location = new System.Drawing.Point(0, 49);
+            this.textBox5.Name = "textBox5";
+            this.textBox5.Size = new System.Drawing.Size(89, 23);
+            this.textBox5.TabIndex = 27;
+            this.textBox5.Text = "Player out";
+            this.textBox5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBox6
+            // 
+            this.textBox6.Font = new System.Drawing.Font("Stencil", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox6.Location = new System.Drawing.Point(0, 74);
+            this.textBox6.Name = "textBox6";
+            this.textBox6.Size = new System.Drawing.Size(89, 23);
+            this.textBox6.TabIndex = 28;
+            this.textBox6.Text = "Player IN";
+            this.textBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // lblTimerStatus
+            // 
+            this.lblTimerStatus.AutoSize = true;
+            this.lblTimerStatus.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.lblTimerStatus.Location = new System.Drawing.Point(51, 35);
+            this.lblTimerStatus.Name = "lblTimerStatus";
+            this.lblTimerStatus.Size = new System.Drawing.Size(172, 35);
+            this.lblTimerStatus.TabIndex = 29;
+            this.lblTimerStatus.Text = "GAME CLOCK";
+            // 
+            // groupBoxActivePlayers
+            // 
+            this.groupBoxActivePlayers.Location = new System.Drawing.Point(0, 0);
+            this.groupBoxActivePlayers.Name = "groupBoxActivePlayers";
+            this.groupBoxActivePlayers.Size = new System.Drawing.Size(100, 23);
+            this.groupBoxActivePlayers.TabIndex = 33;
+            // 
+            // lblSubstitutions
+            // 
+            this.lblSubstitutions.AutoSize = true;
+            this.lblSubstitutions.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.lblSubstitutions.Location = new System.Drawing.Point(43, 16);
+            this.lblSubstitutions.Name = "lblSubstitutions";
+            this.lblSubstitutions.Size = new System.Drawing.Size(167, 35);
+            this.lblSubstitutions.TabIndex = 31;
+            this.lblSubstitutions.Text = "Substitutions";
+            // 
+            // lstActivePlayers
+            // 
+            this.lstActivePlayers.FormattingEnabled = true;
+            this.lstActivePlayers.ItemHeight = 16;
+            this.lstActivePlayers.Items.AddRange(new object[] {
+            "Player "});
+            this.lstActivePlayers.Location = new System.Drawing.Point(17, 35);
+            this.lstActivePlayers.Name = "lstActivePlayers";
+            this.lstActivePlayers.Size = new System.Drawing.Size(154, 100);
+            this.lstActivePlayers.TabIndex = 32;
+            // 
+            // groupBoxTimer
+            // 
+            this.groupBoxTimer.Controls.Add(this.lblTimerStatus);
+            this.groupBoxTimer.Controls.Add(this.btnResetTimer);
+            this.groupBoxTimer.Controls.Add(this.btnPauseTimer);
+            this.groupBoxTimer.Controls.Add(this.btnStartTimer);
+            this.groupBoxTimer.Controls.Add(this.lblGameClock);
+            this.groupBoxTimer.Location = new System.Drawing.Point(318, 31);
+            this.groupBoxTimer.Name = "groupBoxTimer";
+            this.groupBoxTimer.Size = new System.Drawing.Size(257, 211);
+            this.groupBoxTimer.TabIndex = 33;
+            this.groupBoxTimer.TabStop = false;
+            // 
+            // groupActiveplr
+            // 
+            this.groupActiveplr.Controls.Add(this.label1);
+            this.groupActiveplr.Controls.Add(this.lstActivePlayers);
+            this.groupActiveplr.Controls.Add(this.groupBoxActivePlayers);
+            this.groupActiveplr.Location = new System.Drawing.Point(968, 9);
+            this.groupActiveplr.Name = "groupActiveplr";
+            this.groupActiveplr.Size = new System.Drawing.Size(184, 162);
+            this.groupActiveplr.TabIndex = 35;
+            this.groupActiveplr.TabStop = false;
+            this.groupActiveplr.Text = "groupBox1";
+            // 
+            // groupBoxSubstitutions
+            // 
+            this.groupBoxSubstitutions.Controls.Add(this.lblSubstitutions);
+            this.groupBoxSubstitutions.Controls.Add(this.textBox5);
+            this.groupBoxSubstitutions.Controls.Add(this.cmbPlayersOut);
+            this.groupBoxSubstitutions.Controls.Add(this.btnSubstitute);
+            this.groupBoxSubstitutions.Controls.Add(this.textBox6);
+            this.groupBoxSubstitutions.Controls.Add(this.cmbPlayersIn);
+            this.groupBoxSubstitutions.Location = new System.Drawing.Point(1225, 22);
+            this.groupBoxSubstitutions.Name = "groupBoxSubstitutions";
+            this.groupBoxSubstitutions.Size = new System.Drawing.Size(222, 149);
+            this.groupBoxSubstitutions.TabIndex = 36;
+            this.groupBoxSubstitutions.TabStop = false;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(161)));
+            this.label1.Location = new System.Drawing.Point(33, -3);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(129, 35);
+            this.label1.TabIndex = 34;
+            this.label1.Text = "First Five";
+            // 
+            // basketicsBindingSource
+            // 
+            this.basketicsBindingSource.DataSource = typeof(Basktics_v2._0.Basketics);
+            // 
             // MatchForm
             // 
-            this.ClientSize = new System.Drawing.Size(1812, 638);
+            this.ClientSize = new System.Drawing.Size(1540, 638);
+            this.Controls.Add(this.groupBoxSubstitutions);
+            this.Controls.Add(this.groupActiveplr);
+            this.Controls.Add(this.groupBoxTimer);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.Summary);
             this.Controls.Add(this.btnSave);
@@ -566,6 +1085,12 @@ namespace Basktics_v2._0
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Summary)).EndInit();
+            this.groupBoxTimer.ResumeLayout(false);
+            this.groupBoxTimer.PerformLayout();
+            this.groupActiveplr.ResumeLayout(false);
+            this.groupActiveplr.PerformLayout();
+            this.groupBoxSubstitutions.ResumeLayout(false);
+            this.groupBoxSubstitutions.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.basketicsBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -595,13 +1120,72 @@ namespace Basktics_v2._0
         private DataGridView dataGridView1;
         private TextBox textBox1;
         private TextBox textBox2;
-       // private DataGridViewTextBoxColumn Column13;
+        // private DataGridViewTextBoxColumn Column13;
 
-        private void MatchForm_Load1(object sender, EventArgs e)
+        private void MatchForm_Load(object sender, EventArgs e)
         {
             for (int i = 0; i < 16; i++)
             {
                 dataGridView1.Rows.Add();
+            }
+
+            // Προσθήκη event για αυτόματη ενημέρωση των active players όταν αλλάζουν τα ονόματα
+            this.dataGridView1.CellValueChanged += new DataGridViewCellEventHandler(dataGridView1_CellValueChanged_ForPlayers);
+
+            RefreshPlayersComboBox();
+        }
+        private void dataGridView1_CellValueChanged_ForPlayers(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == 0 && e.RowIndex >= 0) // Column1 είναι η πρώτη στήλη (Player)
+            {
+                SetStartingFiveAutomatically();
+            }
+        }
+
+
+        private void MatchForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Excel Files|*.xlsx";
+                saveFileDialog.Title = "Save Match Data to Excel File";
+                saveFileDialog.FileName = "MatchData.xlsx";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    this.SaveDataToExcel(saveFileDialog.FileName);
+                }
+            }
+        }
+
+        private void SaveDataToExcel(string filepath)
+        {
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
+            using (var package = new ExcelPackage())
+            {
+                ExcelWorksheet sheet = package.Workbook.Worksheets.Add("Players");
+                for (int i = 0; i < dataGridView1.Columns.Count; i++)
+                    sheet.Cells[1, i + 1].Value = dataGridView1.Columns[i].HeaderText;
+
+                for (int i = 0; i < dataGridView1.Rows.Count; i++)
+                    for (int j = 0; j < dataGridView1.Columns.Count; j++)
+                        sheet.Cells[i + 2, j + 1].Value = dataGridView1.Rows[i].Cells[j].Value;
+
+                ExcelWorksheet summarySheet = package.Workbook.Worksheets.Add("Summary");
+                summarySheet.Cells[1, 1].Value = "Position";
+                summarySheet.Cells[1, 2].Value = "Total Points";
+                summarySheet.Cells[1, 3].Value = "Average Points";
+
+                for (int i = 0; i < Summary.Rows.Count; i++)
+                {
+                    summarySheet.Cells[i + 2, 1].Value = Summary.Rows[i].Cells[0].Value;
+                    summarySheet.Cells[i + 2, 2].Value = Summary.Rows[i].Cells[1].Value;
+                    summarySheet.Cells[i + 2, 3].Value = Summary.Rows[i].Cells[2].Value;
+                }
+
+                FileInfo excelFile = new FileInfo(filepath);
+                package.SaveAs(excelFile);
             }
         }
 
@@ -614,44 +1198,29 @@ namespace Basktics_v2._0
         {
             if (e.RowIndex >= 0)
             {
-                // ""Checks if the change was made in one of the columns 2, 3, or 4.""
                 if (e.ColumnIndex == this.Column2.Index || e.ColumnIndex == this.Column3.Index || e.ColumnIndex == this.Column4.Index || e.ColumnIndex == this.Column16.Index)
                 {
-                    // "Get the current row."
                     DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
-
-                    // "Calculate the sum of columns 2, 3, and 4."
                     int twoPoint = Convert.ToInt32(row.Cells["Column2"].Value ?? 0);
                     int twoPointb = Convert.ToInt32(row.Cells["Column16"].Value ?? 0);
                     int threePoint = Convert.ToInt32(row.Cells["Column3"].Value ?? 0);
                     int freeThrows = Convert.ToInt32(row.Cells["Column4"].Value ?? 0);
-
                     int sum = 2 * twoPoint + 2 * twoPointb + 3 * threePoint + freeThrows;
-
-                    // "Store the sum in column 11 (Points)."
                     row.Cells["Column11"].Value = sum;
                 }
-                // ""Checks if the change was made in one of the columns 5, 6 "
+
                 if (e.ColumnIndex == this.Column5.Index || e.ColumnIndex == this.Column6.Index)
                 {
-                    // "Get the current row."
                     DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
-
-                    // "Calculate the sum of columns 5, 6 "
                     int offence = Convert.ToInt32(row.Cells["Column5"].Value ?? 0);
                     int defence = Convert.ToInt32(row.Cells["Column6"].Value ?? 0);
-
-
                     int sum = offence + defence;
-
-                    // "Store the sum in column 12 (Points)."
                     row.Cells["Column12"].Value = sum;
                 }
 
-                if(e.ColumnIndex == this.Column11.Index || e.ColumnIndex == this.Column12.Index || e.ColumnIndex == this.Column7.Index || e.ColumnIndex == this.Column8.Index || e.ColumnIndex == this.Column9.Index || e.ColumnIndex == this.Column24.Index || e.ColumnIndex == this.Column15.Index || e.ColumnIndex == this.Column17.Index || e.ColumnIndex == this.Column18.Index || e.ColumnIndex == this.Column19.Index || e.ColumnIndex == this.Column13.Index || e.ColumnIndex == this.Column25.Index || e.ColumnIndex == this.Column26.Index || e.ColumnIndex == this.Column20.Index)
+                if (e.ColumnIndex == this.Column11.Index || e.ColumnIndex == this.Column12.Index || e.ColumnIndex == this.Column7.Index || e.ColumnIndex == this.Column8.Index || e.ColumnIndex == this.Column9.Index || e.ColumnIndex == this.Column24.Index || e.ColumnIndex == this.Column15.Index || e.ColumnIndex == this.Column17.Index || e.ColumnIndex == this.Column18.Index || e.ColumnIndex == this.Column19.Index || e.ColumnIndex == this.Column13.Index || e.ColumnIndex == this.Column25.Index || e.ColumnIndex == this.Column26.Index || e.ColumnIndex == this.Column20.Index)
                 {
                     DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
-
                     int points = Convert.ToInt32(row.Cells["Column11"].Value ?? 0);
                     int rebounds = Convert.ToInt32(row.Cells["Column12"].Value ?? 0);
                     int assists = Convert.ToInt32(row.Cells["Column7"].Value ?? 0);
@@ -665,40 +1234,25 @@ namespace Basktics_v2._0
                     int turnovers = Convert.ToInt32(row.Cells["Column13"].Value ?? 0);
                     int shotsrejected = Convert.ToInt32(row.Cells["Column26"].Value ?? 0);
                     int foulscommited = Convert.ToInt32(row.Cells["Column25"].Value ?? 0);
-                    
                     int pir = points + rebounds + assists + steals + blocks + foulsdrawn - missedlayups - missedmidrange - threepointmissed - ftmissed - turnovers - shotsrejected - foulscommited;
-
-                    // "Store the pir in column 20 (PIR)."
                     row.Cells["Column20"].Value = pir;
                 }
+
                 if (e.ColumnIndex == this.Column10.Index || e.ColumnIndex == this.Column13.Index || e.ColumnIndex == this.Column7.Index)
                 {
                     DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
                     double assists = Convert.ToDouble(row.Cells["Column7"].Value ?? 0);
                     double turnover = Convert.ToDouble(row.Cells["Column13"].Value ?? 0);
-
-                    double astto;
-                    if (turnover == 0)
-                    {
-                        astto = assists; 
-                    }
-                    else
-                    {
-                        astto = assists / turnover;
-                    }
+                    double astto = turnover == 0 ? assists : assists / turnover;
                     row.Cells["Column10"].Value = Math.Round(astto, 2);
                 }
-
-
-                        }
+            }
             CalculatePointsForPositionSummary();
-
         }
 
         private void CalculatePointsForPositionSummary()
         {
             Summary.Rows.Clear();
-
             var groups = dataGridView1.Rows
                 .Cast<DataGridViewRow>()
                 .Where(r => !r.IsNewRow && r.Cells["Column14"]?.Value != null)
@@ -708,44 +1262,10 @@ namespace Basktics_v2._0
             {
                 double totalPoints = g.Sum(r => Convert.ToDouble(r.Cells["Column11"].Value ?? 0));
                 double avgPoints = g.Average(r => Convert.ToDouble(r.Cells["Column11"].Value ?? 0));
-
                 Summary.Rows.Add(g.Key, Math.Round(totalPoints, 2), Math.Round(avgPoints, 2));
             }
         }
 
-        private void SaveDataToExcel(string filepath)
-        {
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
-            using (var package = new ExcelPackage())
-            {
-                // --- Φύλλο με τα δεδομένα των παικτών ---
-                ExcelWorksheet sheet = package.Workbook.Worksheets.Add("Players");
-                for (int i = 0; i < dataGridView1.Columns.Count; i++)
-                    sheet.Cells[1, i + 1].Value = dataGridView1.Columns[i].HeaderText;
-
-                for (int i = 0; i < dataGridView1.Rows.Count; i++)
-                    for (int j = 0; j < dataGridView1.Columns.Count; j++)
-                        sheet.Cells[i + 2, j + 1].Value = dataGridView1.Rows[i].Cells[j].Value;
-
-                // --- Φύλλο με τα summary ---
-                ExcelWorksheet summarySheet = package.Workbook.Worksheets.Add("Summary");
-                summarySheet.Cells[1, 1].Value = "Position";
-                summarySheet.Cells[1, 2].Value = "Total Points";
-                summarySheet.Cells[1, 3].Value = "Average Points";
-
-                for (int i = 0; i < Summary.Rows.Count; i++)
-                {
-                    summarySheet.Cells[i + 2, 1].Value = Summary.Rows[i].Cells[0].Value;
-                    summarySheet.Cells[i + 2, 2].Value = Summary.Rows[i].Cells[1].Value;
-                    summarySheet.Cells[i + 2, 3].Value = Summary.Rows[i].Cells[2].Value;
-                }
-
-                // --- Αποθήκευση ---
-                FileInfo excelFile = new FileInfo(filepath);
-                package.SaveAs(excelFile);
-            }
-        }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -788,17 +1308,13 @@ namespace Basktics_v2._0
 
         private void Column_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // "Only digits and the Backspace key are allowed."
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true;
             }
         }
 
-        private void MatchForm_Load(object sender, EventArgs e)
-        {
 
-        }
 
         private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -820,8 +1336,141 @@ namespace Basktics_v2._0
         {
 
         }
-        
+       
+        private List<string> allPlayers = new List<string>();
+        private BindingList<string> playersInGame = new BindingList<string>();
+        private BindingList<string> playersOnBench = new BindingList<string>();
 
+        private void InitializePlayers()
+        {
+            // Όλοι οι παίκτες - απευθείας strings
+            allPlayers = new List<string>
+    {
+        "Παίκτης 1", "Παίκτης 2", "Παίκτης 3", "Παίκτης 4", "Παίκτης 5",
+        "Παίκτης 6", "Παίκτης 7", "Παίκτης 8", "Παίκτης 9", "Παίκτης 10"
+    };
+
+            // Αρχικά, όλοι στον πάγκο
+            playersOnBench.Clear();
+            foreach (var player in allPlayers)
+            {
+                playersOnBench.Add(player);
+            }
+
+            playersInGame.Clear(); // Αρχικά κανένας στο γήπεδο
+        }
+        private void SetupSubstitutionColumns()
+        {
+            // Column OUT - παίκτες μέσα
+            DataGridViewComboBoxColumn colOut = new DataGridViewComboBoxColumn();
+            colOut.Name = "ColumnOut";
+            colOut.HeaderText = "Εξερχόμενος";
+            colOut.DataSource = new BindingList<string>(playersInGame.ToList());
+            // ΔΕΝ χρειάζεται DisplayMember ή ValueMember για strings!
+
+            // Column IN - παίκτες έξω
+            DataGridViewComboBoxColumn colIn = new DataGridViewComboBoxColumn();
+            colIn.Name = "ColumnIn";
+            colIn.HeaderText = "Εισερχόμενος";
+            colIn.DataSource = new BindingList<string>(playersOnBench.ToList());
+            // ΔΕΝ χρειάζεται DisplayMember ή ValueMember για strings!
+
+            // Προσθήκη columns
+            if (!dataGridView1.Columns.Contains("ColumnOut"))
+                dataGridView1.Columns.Add(colOut);
+
+            if (!dataGridView1.Columns.Contains("ColumnIn"))
+                dataGridView1.Columns.Add(colIn);
+        }
+        private void dataGridView1_CellValueChangeds(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            if (e.ColumnIndex == dataGridView1.Columns["ColumnOut"].Index ||
+                e.ColumnIndex == dataGridView1.Columns["ColumnIn"].Index)
+            {
+                ProcessSubstitution(e.RowIndex);
+                RefreshAllDropdowns();
+            }
+        }
+
+        private void ProcessSubstitution(int rowIndex)
+        {
+            DataGridViewRow row = dataGridView1.Rows[rowIndex];
+
+            // Απευθείας strings - όχι Player objects
+            string playerOut = row.Cells["ColumnOut"].Value as string;
+            string playerIn = row.Cells["ColumnIn"].Value as string;
+
+            if (!string.IsNullOrEmpty(playerOut) && !string.IsNullOrEmpty(playerIn))
+            {
+                // Μετακίνηση παικτών
+                playersInGame.Remove(playerOut);
+                playersOnBench.Remove(playerIn);
+
+                playersOnBench.Add(playerOut);
+                playersInGame.Add(playerIn);
+
+                // Κάθαρισμα επιλογών
+                row.Cells["ColumnOut"].Value = null;
+                row.Cells["ColumnIn"].Value = null;
+
+                MessageBox.Show($"Αλλαγή: {playerOut} OUT → {playerIn} IN");
+            }
+        }
+
+      
+      
+        private void SetStartingPlayers(List<string> startingPlayers)
+        {
+            playersInGame.Clear();
+            playersOnBench.Clear();
+
+            foreach (var player in allPlayers)
+            {
+                if (startingPlayers.Contains(player))
+                    playersInGame.Add(player);
+                else
+                    playersOnBench.Add(player);
+            }
+
+            RefreshAllDropdowns();
+        }
+
+        // Παράδειγμα χρήσης:
+        private void btnStartGame_Click(object sender, EventArgs e)
+        {
+            SetStartingPlayers(new List<string> { "Παίκτης 1", "Παίκτης 2", "Παίκτης 3", "Παίκτης 4", "Παίκτης 5" });
+        }
+
+        private void RefreshAllDropdowns()
+        {
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    DataGridViewComboBoxCell cellOut = (DataGridViewComboBoxCell)row.Cells["ColumnOut"];
+                    DataGridViewComboBoxCell cellIn = (DataGridViewComboBoxCell)row.Cells["ColumnIn"];
+
+                    cellOut.DataSource = new BindingList<string>(playersInGame.ToList());
+                    cellIn.DataSource = new BindingList<string>(playersOnBench.ToList());
+                }
+            }
+        }
+
+
+
+        private void UpdatePlayerLists()
+        {
+            playersInGame.Clear();
+            playersOnBench.Clear();
+
+            // Αρχικά, όλοι στον πάγκο
+            foreach (var player in allPlayers)
+            {
+                playersOnBench.Add(player);
+            }
+        }
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -839,7 +1488,13 @@ namespace Basktics_v2._0
         {
 
         }
-
+        private Label lblGameClock;
+        private Button btnStartTimer;
+        private Button btnPauseTimer;
+        private Button btnResetTimer;
+        private ComboBox cmbPlayersOut;
+        private ComboBox cmbPlayersIn;
+        private Button btnSubstitute;
         private DataGridViewTextBoxColumn Column1;
         private DataGridViewTextBoxColumn Column14;
         private DataGridViewTextBoxColumn Column2;
@@ -863,5 +1518,27 @@ namespace Basktics_v2._0
         private DataGridViewTextBoxColumn Column12;
         private DataGridViewTextBoxColumn Column20;
         private DataGridViewTextBoxColumn Column10;
+        private DataGridViewTextBoxColumn ColumnPlayingTime;
+        private TextBox textBox5;
+        private TextBox textBox6;
+        private Label lblTimerStatus;
+        private Label groupBoxActivePlayers;
+        private Label lblSubstitutions;
+        private ListBox lstActivePlayers;
+        private GroupBox groupBoxTimer;
+        private GroupBox groupActiveplr;
+        private GroupBox groupBoxSubstitutions;
+        private bool isStartingFiveSet = false; // Προσθήκη μεταβλητής παρακολούθησης
+        private void btnSave_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnStartTimer_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private Label label1;
     }
 }
